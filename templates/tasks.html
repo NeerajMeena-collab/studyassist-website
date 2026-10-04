@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+<section class="page-heading heading-row"><div><p class="eyebrow">PLAN YOUR DAY</p><h1>Tasks</h1><p class="muted">Make your next step clear and manageable.</p></div><a class="button button-primary" href="#add-task">＋ Add task</a></section>
+<section class="panel task-manager">
+  <div class="panel-heading task-toolbar"><div class="tabs" role="tablist"><a class="tab {% if view == 'today' %}selected{% endif %}" href="{{ url_for('tasks_page', view='today') }}">Today</a><a class="tab {% if view == 'upcoming' %}selected{% endif %}" href="{{ url_for('tasks_page', view='upcoming') }}">Upcoming</a><a class="tab {% if view == 'all' %}selected{% endif %}" href="{{ url_for('tasks_page', view='all') }}">All</a><a class="tab {% if view == 'completed' %}selected{% endif %}" href="{{ url_for('tasks_page', view='completed') }}">Completed</a></div><span class="date-chip">◷ {{ today }}</span></div>
+  <div class="task-list full-task-list">
+    {% for task in tasks %}<div class="task-row {% if task.completed %}is-complete{% endif %}">
+      <form method="post" action="{{ url_for('toggle_task', task_id=task.id) }}"><input type="hidden" name="view" value="{{ view }}"><button class="check-button {% if task.completed %}checked{% endif %}" aria-label="Toggle task completion">{% if task.completed %}✓{% endif %}</button></form>
+      <div class="task-copy"><strong>{{ task.title }}</strong><small>{% if task.subject_name %}{{ task.subject_name }}{% else %}No subject{% endif %} · Due {{ task.due_date }}</small></div>
+      <span class="priority priority-{{ task.priority|lower }}">{{ task.priority }}</span>
+      <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}"><input type="hidden" name="view" value="{{ view }}"><button class="icon-button" aria-label="Delete task">×</button></form>
+    </div>{% else %}<div class="empty-state"><span>☑</span><strong>No tasks in this view</strong><p>Add a task to plan your study time.</p></div>{% endfor %}
+  </div>
+</section>
+<section class="panel add-task-panel" id="add-task"><div class="panel-heading"><div><h2>Create a task</h2><p class="muted">Give yourself a clear next action.</p></div></div>
+  <form method="post" action="{{ url_for('add_task') }}" class="task-form">
+    <label class="grow-field">Task name<input name="title" placeholder="e.g. Review chapter 2 notes" required maxlength="160"></label>
+    <label>Subject<select name="subject_id"><option value="">No subject</option>{% for subject in subjects %}<option value="{{ subject.id }}">{{ subject.name }}</option>{% endfor %}</select></label>
+    <label>Due date<input type="date" name="due_date" value="{{ today }}" required></label>
+    <label>Priority<select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+    <button class="button button-primary">Save task</button>
+  </form>
+</section>
+{% endblock %}

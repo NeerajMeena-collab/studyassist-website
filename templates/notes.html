@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Notes{% endblock %}
+{% block content %}
+<section class="page-heading heading-row"><div><p class="eyebrow">YOUR STUDY LIBRARY</p><h1>Notes</h1><p class="muted">Keep useful ideas and class notes in one place.</p></div><a class="button button-primary" href="{{ url_for('notes_page', new=1) }}">＋ New note</a></section>
+<section class="notes-layout">
+  <aside class="panel notes-sidebar">
+    <form method="get" action="{{ url_for('notes_page') }}" class="search-box"><span>⌕</span><input name="q" value="{{ search }}" placeholder="Search your notes…" aria-label="Search notes"></form>
+    <div class="notes-list-heading"><span>ALL NOTES</span><span>{{ notes|length }}</span></div>
+    <div class="note-links">{% for note in notes %}<a class="note-link {% if selected and selected.id == note.id %}selected{% endif %}" href="{{ url_for('notes_page', note=note.id, q=search) }}"><span class="note-mark" style="--subject-color: {{ note.subject_color or '#6958e8' }}">▧</span><span><strong>{{ note.title }}</strong><small>{{ note.subject_name or 'Unassigned' }} · {{ note.updated_at[:10] }}</small><em>{{ note.content[:70] }}{% if note.content|length > 70 %}…{% endif %}</em></span></a>{% else %}<p class="muted note-empty">No notes found. Create one to get started.</p>{% endfor %}</div>
+  </aside>
+  <article class="panel note-editor">
+    {% set is_new = request.args.get('new') %}
+    {% if selected or is_new %}<form method="post" action="{{ url_for('save_note') }}" class="note-form">
+      {% if selected %}<input type="hidden" name="note_id" value="{{ selected.id }}">{% endif %}
+      <div class="editor-top"><span class="eyebrow">{{ 'EDIT NOTE' if selected else 'NEW NOTE' }}</span><label class="subject-select"><span class="sr-only">Subject</span><select name="subject_id"><option value="">No subject</option>{% for subject in subjects %}<option value="{{ subject.id }}" {% if selected and selected.subject_id == subject.id %}selected{% endif %}>{{ subject.name }}</option>{% endfor %}</select></label></div>
+      <input class="note-title-input" name="title" value="{{ selected.title if selected else '' }}" placeholder="Note title" required maxlength="140">
+      <div class="format-toolbar"><span><b>B</b></span><span><i>I</i></span><span>• List</span><span class="muted">Plain text editor</span></div>
+      <textarea name="content" placeholder="Write down the important ideas, examples, or questions from class…">{{ selected.content if selected else '' }}</textarea>
+      <div class="editor-footer"><span class="muted">Saved to this device's SQLite database</span><div><button class="button button-primary">Save note</button></div></div>
+    </form>{% else %}<div class="note-welcome"><div class="welcome-note-icon">▧</div><h2>Select a note to read</h2><p>Or create a new note to keep your study ideas organized.</p><a class="button button-primary" href="{{ url_for('notes_page', new=1) }}">＋ New note</a></div>{% endif %}
+    {% if selected %}<form method="post" action="{{ url_for('delete_note', note_id=selected.id) }}" class="delete-note-form" data-confirm="Delete this note permanently?"><button class="text-button danger-text">Delete note</button></form>{% endif %}
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Progress Tracker{% endblock %}
+{% block content %}
+<section class="page-heading heading-row">
+  <div><p class="eyebrow">YOUR CLASS RECORD</p><h1>Progress Tracker</h1><p class="muted">Track a clear record of the classes you attend.</p></div>
+  <a class="button button-primary" href="#mark-attendance">＋ Mark attendance</a>
+</section>
+
+<section class="stats-grid attendance-stats">
+  <article class="stat-card"><div class="stat-icon violet">◷</div><div><strong>{{ attendance_rate }}%</strong><span>Attendance rate</span></div><small class="stat-note">{{ attended }} of {{ classes_held }} classes attended</small></article>
+  <article class="stat-card"><div class="stat-icon green">✓</div><div><strong>{{ attended }}</strong><span>Classes attended</span></div><small class="stat-note">Across all subjects</small></article>
+  <article class="stat-card"><div class="stat-icon blue">▤</div><div><strong>{{ classes_held - attended }}</strong><span>Classes missed</span></div><small class="stat-note">Based on your records</small></article>
+  <article class="stat-card"><div class="stat-icon orange">▣</div><div><strong>{{ classes_held }}</strong><span>Classes recorded</span></div><small class="stat-note">Add a record after class</small></article>
+</section>
+
+<article class="panel attendance-calendar-panel">
+  <div class="attendance-calendar-heading">
+    <div><h2>{{ month_label }}</h2><p class="muted">Click any day to choose its attendance date.</p></div>
+    <div class="calendar-navigation"><a href="{{ url_for('attendance_page', month=previous_month) }}" aria-label="Previous month" title="Previous month">‹</a><a href="{{ url_for('attendance_page', month=next_month) }}" aria-label="Next month" title="Next month">›</a></div>
+  </div>
+  <div class="calendar-weekdays" aria-hidden="true">{% for weekday in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}<span>{{ weekday }}</span>{% endfor %}</div>
+  <div class="attendance-calendar">
+    {% for week in calendar_weeks %}{% for calendar_day in week %}
+    <a class="calendar-day {% if not calendar_day.in_month %}outside-month{% endif %} {% if calendar_day.is_today %}today{% endif %} {% if calendar_day.is_selected %}selected{% endif %}" href="{{ url_for('attendance_page', month=calendar_day.month, date=calendar_day.date) }}#mark-attendance" aria-label="{{ calendar_day.date }}: {{ calendar_day.present }} present, {{ calendar_day.absent }} absent" title="{{ calendar_day.date }} · {{ calendar_day.present }} present · {{ calendar_day.absent }} absent">
+      <span class="calendar-number">{{ calendar_day.number }}</span>
+      {% if calendar_day.entries %}<span class="calendar-markers">{% for entry in calendar_day.entries[:5] %}<i class="{{ entry.status|lower }}" title="{{ entry.subject_name }}: {{ entry.status }}"></i>{% endfor %}{% if calendar_day.entries|length > 5 %}<small>+{{ calendar_day.entries|length - 5 }}</small>{% endif %}</span><small class="calendar-count">{{ calendar_day.present }}P · {{ calendar_day.absent }}A</small>{% endif %}
+    </a>
+    {% endfor %}{% endfor %}
+  </div>
+  <div class="calendar-legend"><span><i class="present"></i>Present</span><span><i class="absent"></i>Absent</span><span class="muted">Selected date: {{ selected_date }}</span></div>
+</article>
+
+<section class="attendance-layout">
+  <div class="stack-column">
+    <article class="panel" id="mark-attendance">
+      <div class="panel-heading"><div><h2>Mark a class</h2><p class="muted">One record per subject each day. Save again to update it.</p></div><span class="attendance-badge">{{ selected_date }}</span></div>
+      {% if subjects %}
+      <form class="attendance-form" method="post" action="{{ url_for('save_attendance') }}">
+        <label>Subject<select name="subject_id" required><option value="" disabled selected>Select subject</option>{% for subject in subjects %}<option value="{{ subject.id }}">{{ subject.name }}</option>{% endfor %}</select></label>
+        <label>Date<input type="date" name="attendance_date" value="{{ selected_date }}" required></label>
+        <label>Status<select name="status"><option>Present</option><option>Absent</option></select></label>
+        <label class="attendance-note-field">Note <span class="muted">(optional)</span><input name="note" maxlength="160" placeholder="e.g. Lab session or lecture"></label>
+        <button class="button button-primary" type="submit">Save attendance</button>
+      </form>
+      {% else %}<div class="empty-state"><span>▤</span><strong>Add a subject first</strong><p>Attendance records are organized by subject.</p><a class="button button-primary" href="{{ url_for('subjects_page') }}">Open subjects</a></div>{% endif %}
+    </article>
+
+    <article class="panel" id="attendance-history">
+      <div class="panel-heading"><div><h2>Recent classes</h2><p class="muted">Your latest attendance entries</p></div><span class="pill">{{ records|length }} RECORDS</span></div>
+      {% if records %}<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>Subject</th><th>Date</th><th>Status</th><th>Note</th><th></th></tr></thead><tbody>
+      {% for record in records %}<tr><td><span class="attendance-subject"><i style="--subject-color: {{ record.subject_color }}"></i>{{ record.subject_name }}</span></td><td>{{ record.attendance_date }}</td><td><span class="attendance-status {{ record.status|lower }}">{{ record.status }}</span></td><td class="attendance-note">{{ record.note or '—' }}</td><td><form method="post" action="{{ url_for('delete_attendance', entry_id=record.id) }}" onsubmit="return confirm('Remove this attendance record?')"><button class="icon-button" type="submit" title="Remove record" aria-label="Remove record">×</button></form></td></tr>{% endfor %}
+      </tbody></table></div>{% else %}<div class="empty-state"><span>✓</span><strong>No attendance records yet</strong><p>Record your first class to see your attendance history here.</p></div>{% endif %}
+    </article>
+  </div>
+
+  <aside class="panel attendance-subjects">
+    <div class="panel-heading"><div><h2>By subject</h2><p class="muted">Attendance across your classes</p></div></div>
+    {% if subjects %}<div class="attendance-subject-list">{% for subject in subjects %}{% set rate = ((subject.attended / subject.classes_held * 100)|round|int) if subject.classes_held else 0 %}
+      <div class="attendance-subject-card"><div class="attendance-subject-head"><span class="subject-badge" style="--subject-color: {{ subject.color }}">{{ subject.name[:1] }}</span><div><strong>{{ subject.name }}</strong><small>{{ subject.attended }} attended · {{ subject.classes_held - subject.attended }} missed</small></div><b>{{ rate }}%</b></div><div class="attendance-progress"><span style="width: {{ rate }}%;--subject-color: {{ subject.color }}"></span></div></div>
+    {% endfor %}</div>{% else %}<p class="muted">Your subjects will appear here.</p>{% endif %}
+    <p class="attendance-hint">Keep your records up to date to see a useful attendance rate for each subject.</p>
+  </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}AI Study Assistant{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">A STUDY BUDDY FOR YOUR SEMESTER</p><h1>AI Study Assistant <span class="sparkle-title">✧</span></h1><p class="muted">Type or speak a question to make a study plan or break a big topic into smaller steps.</p></section>
+<section class="assistant-layout">
+  <article class="assistant-chat panel">
+    <div class="chat-header"><div class="bot-avatar">✦</div><div><strong>Study buddy</strong><span><i></i> Ready to help</span></div><span class="pill">{{ 'AI KEY SET' if ai_enabled else 'DEMO MODE' }}</span></div>
+    <div class="chat-body">
+      <div class="chat-message assistant-message"><div class="bot-avatar small-avatar">✦</div><div><p>Hi! Type or tap Speak to tell me what you're studying and how much time you have. I can help you make a manageable plan.</p><small>StudyAssist</small></div></div>
+      {% if answer %}<div class="chat-message user-message"><div class="message-bubble">{{ question }}</div></div><div class="chat-message assistant-message"><div class="bot-avatar small-avatar">✦</div><div><div class="message-bubble answer-text">{{ answer }}</div><div class="answer-tools"><button type="button" class="voice-button voice-button-quiet" data-speak-answer>🔊 <span>Read answer aloud</span></button><button type="button" class="voice-button voice-button-quiet" data-stop-speaking hidden>Stop</button></div><small>{{ assistant_status }}</small></div></div>{% endif %}
+    </div>
+    <form method="post" class="chat-input" data-chat-form><textarea name="question" rows="2" placeholder="e.g. Help me revise C loops in 1 hour…" aria-label="Your study question" required>{{ question if answer else '' }}</textarea><div class="chat-input-footer"><div class="voice-input-group"><button type="button" class="voice-button" data-voice-input aria-label="Start voice input">🎙 <span>Speak</span></button><span class="voice-status" data-voice-status aria-live="polite">Tap Speak and review the transcript before sending.</span></div><button class="send-button" aria-label="Ask assistant">➤</button></div></form>
+    <p class="chat-footnote">{% if ai_enabled %}An API key is set. If the AI service cannot connect, built-in demo suggestions are shown.{% else %}Demo mode: built-in suggestions work offline. Add an API key for AI-generated answers.{% endif %} Study advice is a starting point; adjust it to your class schedule.</p>
+  </article>
+  <aside class="stack-column">
+    <article class="panel prompt-panel"><h2>Try asking</h2><button type="button" data-prompt="Make me a 5-day revision plan for my exams.">Make a 5-day revision plan <span>→</span></button><button type="button" data-prompt="Help me break my next assignment into small steps.">Break an assignment into steps <span>→</span></button><button type="button" data-prompt="How can I revise a difficult topic in 30 minutes?">Revise a difficult topic <span>→</span></button></article>
+    <article class="tip-card"><span>♧</span><div><strong>Make it yours</strong><p>Share your topic and available time for a more useful plan. Your subjects and open tasks help shape suggestions.</p></div></article>
+  </aside>
+</section>
+{% endblock %}

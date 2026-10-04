@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Subjects{% endblock %}
+{% block content %}
+<section class="page-heading heading-row"><div><p class="eyebrow">YOUR LEARNING MAP</p><h1>Subjects</h1><p class="muted">Organize classes and keep track of topics to study.</p></div><a class="button button-primary" href="#add-subject">＋ Add subject</a></section>
+
+<section class="subject-grid">
+  {% for subject in subjects %}{% set percent = ((subject.topics_done / subject.topic_count * 100)|round|int) if subject.topic_count else 0 %}
+  <article class="subject-card panel" style="--subject-color: {{ subject.color }}">
+    <div class="subject-card-head"><div class="subject-badge large-badge">{{ subject.name[:1] }}</div><form method="post" action="{{ url_for('delete_subject', subject_id=subject.id) }}" data-confirm="Delete this subject? Its topics will also be removed."><button class="icon-button danger-text" aria-label="Delete {{ subject.name }}">×</button></form></div>
+    <h2>{{ subject.name }}</h2><p class="muted">{{ subject.topic_count }} topic{{ '' if subject.topic_count == 1 else 's' }} · {{ subject.topics_done }} completed</p>
+    <div class="progress-track subject-progress"><span style="width: {{ percent }}%;--subject-color: {{ subject.color }}"></span></div>
+    <div class="subject-card-foot"><span>{{ percent }}% covered</span><a href="{{ url_for('subjects_page', subject=subject.id) }}">View topics →</a></div>
+  </article>
+  {% endfor %}
+  <article class="subject-card add-subject-card" id="add-subject"><h2>Add a subject</h2><p class="muted">Use the classes from your semester.</p><form method="post" action="{{ url_for('add_subject') }}" class="form-stack">
+    <label>Subject name<input name="name" placeholder="e.g. Computer Science" required maxlength="80"></label>
+    <label>Color <input type="color" name="color" value="#6958e8" class="color-input"></label>
+    <button class="button button-primary">Save subject</button>
+  </form></article>
+</section>
+
+<section class="panel topics-panel">
+  <div class="panel-heading"><div><p class="eyebrow">STUDY CHECKLIST</p><h2>{% if selected_id %}Topics for selected subject{% else %}Your topics{% endif %}</h2></div>
+    <form method="get" class="inline-filter"><label class="sr-only" for="subject-filter">Filter by subject</label><select name="subject" id="subject-filter" onchange="this.form.submit()"><option value="">All subjects</option>{% for subject in subjects %}<option value="{{ subject.id }}" {% if selected_id == subject.id %}selected{% endif %}>{{ subject.name }}</option>{% endfor %}</select></form>
+  </div>
+  {% if subjects %}<form class="topic-add-form" method="post" action="{{ url_for('add_topic') }}"><select name="subject_id" required aria-label="Choose a subject"><option value="">Choose subject</option>{% for subject in subjects %}<option value="{{ subject.id }}" {% if selected_id == subject.id %}selected{% endif %}>{{ subject.name }}</option>{% endfor %}</select><input name="name" placeholder="Add a topic to study…" required maxlength="120"><input name="due_date" type="date" aria-label="Optional target date"><button class="button button-primary">Add topic</button></form>{% endif %}
+  {% if topics %}<div class="topic-list">{% for topic in topics %}<div class="topic-row {% if topic.completed %}is-complete{% endif %}"><form method="post" action="{{ url_for('toggle_topic', topic_id=topic.id) }}"><input type="hidden" name="subject_id" value="{{ selected_id or '' }}"><button class="check-button {% if topic.completed %}checked{% endif %}" aria-label="Toggle topic completion">{% if topic.completed %}✓{% endif %}</button></form><div class="task-copy"><strong>{{ topic.name }}</strong><small>{{ topic.subject_name }}</small></div><span class="muted small-date">{{ topic.due_date or 'No target date' }}</span><form method="post" action="{{ url_for('delete_topic', topic_id=topic.id) }}"><input type="hidden" name="subject_id" value="{{ selected_id or '' }}"><button class="icon-button" aria-label="Delete topic">×</button></form></div>{% endfor %}</div>{% else %}<div class="empty-state compact-empty"><span>✎</span><strong>No topics yet</strong><p>Add a topic above and it'll appear here.</p></div>{% endif %}
+</section>
+{% endblock %}

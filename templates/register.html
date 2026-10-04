@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ff">
+  <title>Create account · StudyAssist</title>
+  <script>try{if(localStorage.getItem('studyassist-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(error){}</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-card">
+      <div class="auth-brand-row"><a class="auth-brand" href="{{ url_for('register') }}"><span class="brand-mark">✦</span><span>StudyAssist</span></a><button type="button" class="theme-toggle light-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Switch theme">☾</button></div>
+      <div class="auth-heading"><p class="eyebrow">GET STARTED</p><h1>Create your student account</h1><p class="muted">Set up a username and password for this local app.</p></div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% endwith %}
+      <form method="post" class="auth-form">
+        <label>Username<input name="username" autocomplete="username" placeholder="3–32 letters, numbers, _ or -" required minlength="3" maxlength="32" autofocus></label>
+        <label>Password<input name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required minlength="8"></label>
+        <label>Confirm password<input name="confirm_password" type="password" autocomplete="new-password" placeholder="Enter the same password again" required minlength="8"></label>
+        <button class="button button-primary auth-submit">Create account <span>→</span></button>
+      </form>
+      <p class="auth-switch">Already set up? <a href="{{ url_for('login') }}">Log in</a></p>
+      <p class="auth-foot">This beginner project supports one local student account.</p>
+    </section>
+    <aside class="auth-art"><div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div><div class="auth-art-content"><div class="book-stack"><span>✦</span></div><p class="eyebrow">YOUR SEMESTER, ORGANIZED</p><h2>Start with one<br>small step.</h2><p>Your demo subjects, tasks, and notes are ready in your study workspace.</p><div class="auth-art-stats"><span>01 <small>Pick a task</small></span><span>02 <small>Focus for 25 min</small></span><span>03 <small>Celebrate progress</small></span></div></div></aside>
+  </main>
+</body>
+</html>

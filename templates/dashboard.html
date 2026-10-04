@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="page-heading heading-row dashboard-hero" data-dashboard-hero data-daypart="evening">
+  <div class="dashboard-hero-content">
+    <p class="dashboard-meta"><time data-live-date datetime="{{ today }}">{{ today }}</time></p>
+    <h1><span data-time-greeting>Good morning</span>, {{ session.get('username', 'Student') }} <span class="wave">✋</span></h1>
+    <blockquote class="daily-quote"><p>{{ daily_quote[0] }}</p><cite>— <strong>{{ daily_quote[1] }}</strong></cite></blockquote>
+  </div>
+  <div class="dashboard-hero-actions">
+    <div class="dashboard-clock" aria-label="Current local time"><span data-clock-hours aria-hidden="true">--</span><span class="clock-separator" aria-hidden="true">:</span><span data-clock-minutes aria-hidden="true">--</span><time data-live-time class="visually-hidden">--:--</time></div>
+    <a class="button button-primary add-task-button" href="{{ url_for('tasks_page') }}" aria-label="Add a task" title="Add a task">+</a>
+  </div>
+  <div class="hero-scenery" aria-hidden="true"><span class="hero-sun"></span><span class="hero-mountain hero-mountain-far"></span><span class="hero-mountain hero-mountain-mid"></span><span class="hero-mountain hero-mountain-near"></span></div>
+</section>
+
+<section class="streak-banner {% if task_completed_today %}streak-complete{% endif %}" aria-label="Daily task streak">
+  <div class="streak-flame" aria-hidden="true">🔥</div>
+  <div class="streak-main">
+    <p class="eyebrow">DAILY TASK STREAK</p>
+    <div class="streak-count"><strong>{{ task_streak }}</strong><span>{{ 'day' if task_streak == 1 else 'days' }} in a row</span></div>
+    <p class="streak-message">{{ streak_message }}</p>
+  </div>
+  <div class="streak-checkin">
+    <div class="streak-checkin-heading"><span>Today's check-in</span><strong>{% if task_completed_today %}✓ DONE{% else %}TO DO{% endif %}</strong></div>
+    <div class="streak-track"><span style="width: {{ 100 if task_completed_today else 0 }}%"></span></div>
+    <small data-streak-reset>New day in --:--</small>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card"><div class="stat-icon violet">▤</div><div><strong>{{ subject_count }}</strong><span>Subjects</span></div><small class="stat-note">in your workspace</small></article>
+  <article class="stat-card"><div class="stat-icon green">☑</div><div><strong>{{ pending_count }}</strong><span>Open tasks</span></div><small class="stat-note">to keep moving on</small></article>
+  <article class="stat-card"><div class="stat-icon blue">◷</div><div><strong>{{ '%.1f'|format(study_hours) }}</strong><span>Study hours today</span></div><small class="stat-note">{{ sessions_today }} focus sessions</small></article>
+  <article class="stat-card"><div class="stat-icon orange">▧</div><div><strong>{{ notes_count }}</strong><span>Saved notes</span></div><small class="stat-note">your study library</small></article>
+</section>
+
+<section class="dashboard-grid">
+  <div class="stack-column">
+    <article class="panel">
+      <div class="panel-heading"><div><h2>Today's tasks</h2><p class="muted">{{ tasks|selectattr('completed', 'equalto', 0)|list|length }} left to do</p></div><a class="text-link" href="{{ url_for('tasks_page') }}">View all →</a></div>
+      {% if tasks %}<div class="task-list compact-list">
+        {% for task in tasks %}
+        <div class="task-row {% if task.completed %}is-complete{% endif %}">
+          <form method="post" action="{{ url_for('toggle_task', task_id=task.id) }}"><button class="check-button {% if task.completed %}checked{% endif %}" aria-label="Toggle task completion">{% if task.completed %}✓{% endif %}</button></form>
+          <div class="task-copy"><strong>{{ task.title }}</strong><small>{% if task.subject_name %}{{ task.subject_name }}{% else %}Unassigned{% endif %}</small></div>
+          <span class="priority priority-{{ task.priority|lower }}">{{ task.priority }}</span>
+        </div>
+        {% endfor %}
+      </div>{% else %}<div class="empty-state"><span>☀</span><strong>No tasks due today</strong><p>Add a task whenever you're ready.</p><a class="text-link" href="{{ url_for('tasks_page') }}">Open task list →</a></div>{% endif %}
+    </article>
+
+    <article class="panel">
+      <div class="panel-heading"><div><h2>Subject progress</h2><p class="muted">Track the topics you've covered</p></div><a class="text-link" href="{{ url_for('subjects_page') }}">Manage →</a></div>
+      {% if subjects %}<div class="progress-list">
+        {% for subject in subjects %}{% set percent = ((subject.topics_done / subject.topic_count * 100)|round|int) if subject.topic_count else 0 %}
+        <div class="progress-item"><div class="subject-badge" style="--subject-color: {{ subject.color }}">{{ subject.name[:1] }}</div><div class="progress-main"><div class="progress-label"><strong>{{ subject.name }}</strong><span>{{ percent }}%</span></div><div class="progress-track"><span style="width: {{ percent }}%;--subject-color: {{ subject.color }}"></span></div></div></div>
+        {% endfor %}
+      </div>{% else %}<p class="muted">Add your first subject to begin.</p>{% endif %}
+    </article>
+  </div>
+
+  <div class="stack-column">
+    <article class="panel timer-preview">
+      <div class="panel-heading"><div><h2>Study timer</h2><p class="muted">Take one focused step</p></div><span class="live-dot">● Ready</span></div>
+      <div class="mini-timer"><div class="timer-ring small-ring"><div><strong>25:00</strong><small>Focus time</small></div></div></div>
+      <a class="button button-primary button-wide" href="{{ url_for('pomodoro_page') }}">Start a focus session</a>
+    </article>
+    <article class="suggestion-card">
+      <div class="suggestion-top"><span class="sparkle-icon">✧</span><div><h2>Study suggestion</h2><p>One idea for right now</p></div><span class="pill">QUICK TIP</span></div>
+      <p class="suggestion-text">{{ suggestion }}</p>
+      <a class="text-link" href="{{ url_for('assistant_page') }}">Ask the study assistant →</a>
+    </article>
+    <article class="panel quick-links"><h2>Quick access</h2><a href="{{ url_for('notes_page', new=1) }}"><span class="quick-icon violet">＋</span><span><strong>Write a note</strong><small>Capture an idea before you forget</small></span><b>→</b></a><a href="{{ url_for('subjects_page') }}"><span class="quick-icon green">▤</span><span><strong>Review subjects</strong><small>Keep your topics organized</small></span><b>→</b></a></article>
+  </div>
+</section>
+{% endblock %}

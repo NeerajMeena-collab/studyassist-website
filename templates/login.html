@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ff">
+  <title>Log in · StudyAssist</title>
+  <script>try{if(localStorage.getItem('studyassist-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(error){}</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-card">
+      <div class="auth-brand-row"><a class="auth-brand" href="{{ url_for('login') }}"><span class="brand-mark">✦</span><span>StudyAssist</span></a><button type="button" class="theme-toggle light-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Switch theme">☾</button></div>
+      <div class="auth-heading"><p class="eyebrow">WELCOME BACK</p><h1>Log in to your study space</h1><p class="muted">Pick up where you left off and keep making progress.</p></div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% endwith %}
+      <form method="post" class="auth-form">
+        <label>Username<input name="username" autocomplete="username" placeholder="Your username" required maxlength="32" autofocus></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Your password" required></label>
+        <button class="button button-primary auth-submit">Log in <span>→</span></button>
+      </form>
+      {% if not has_account %}<p class="auth-switch">First time here? <a href="{{ url_for('register') }}">Create your student account</a></p>{% else %}<p class="auth-hint">This local project has one student account.</p>{% endif %}
+      <p class="auth-foot">Your study data stays in the local SQLite database.</p>
+    </section>
+    <aside class="auth-art"><div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div><div class="auth-art-content"><div class="book-stack"><span>✦</span></div><p class="eyebrow">YOUR SEMESTER, ORGANIZED</p><h2>Make today<br>count.</h2><p>Subjects, tasks, notes, and focused study time — all in one place.</p><div class="auth-feature-list"><div><span>◷</span><strong>Focus timer<small>Study in short sessions</small></strong></div><div><span>▣</span><strong>Attendance<small>Keep track of each class</small></strong></div><div><span>✧</span><strong>Study buddy<small>Get help planning your week</small></strong></div></div></div></aside>
+  </main>
+</body>
+</html>

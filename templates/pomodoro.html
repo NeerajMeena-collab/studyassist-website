@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Pomodoro Timer{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">FOCUS, THEN REST</p><h1>Pomodoro timer</h1><p class="muted">Work in short sessions and give your brain time to recharge.</p></section>
+<section class="pomodoro-layout">
+  <article class="panel timer-panel" data-timer>
+    <div class="timer-tabs"><button class="timer-tab active" data-mode="focus" data-minutes="25">Pomodoro</button><button class="timer-tab" data-mode="short" data-minutes="5">Short break</button><button class="timer-tab" data-mode="long" data-minutes="15">Long break</button></div>
+    <div class="timer-ring" aria-live="polite"><div><strong data-time>25:00</strong><small data-label>Focus time</small></div></div>
+    <div class="timer-controls"><button class="button button-primary" data-start>Start focus</button><button class="button button-secondary" data-reset>Reset</button></div>
+    <p class="timer-helper">A common rhythm is 25 minutes of focus followed by a 5-minute break.</p>
+  </article>
+  <aside class="stack-column">
+    <article class="panel session-summary"><p class="eyebrow">TODAY</p><h2>Your focus sessions</h2><div class="session-stats"><div><strong data-session-count>{{ sessions|length }}</strong><span>Sessions</span></div><div><strong data-total-hours>{{ (total_minutes / 60)|round(1) }}</strong><span>Focus hours</span></div></div><div class="session-list" data-session-list>{% for session in sessions %}<div><span class="session-check">✓</span><span>{{ session.minutes }} minute focus</span><time>{{ session.completed_at[11:16] }}</time></div>{% else %}<p class="muted">Your completed sessions will show up here.</p>{% endfor %}</div></article>
+    <article class="tip-card"><span>✦</span><div><strong>Before you start</strong><p>Choose one task, silence distractions, and keep a glass of water nearby.</p></div></article>
+  </aside>
+</section>
+{% endblock %}

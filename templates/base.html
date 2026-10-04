@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ff">
+  <title>{% block title %}StudyAssist{% endblock %} · StudyAssist</title>
+  <script>try{if(localStorage.getItem('studyassist-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(error){}</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="{{ url_for('dashboard') }}">
+        <span class="brand-mark">✦</span><span>Study<span class="brand-light">Assist</span></span>
+      </a>
+      <div class="nav-heading"><div class="nav-label">WORKSPACE</div><button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Switch theme">☾</button></div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.path == '/' %}active{% endif %}"><span>⌂</span>Dashboard</a>
+        <a href="{{ url_for('subjects_page') }}" class="nav-link {% if request.path.startswith('/subjects') %}active{% endif %}"><span>▤</span>Subjects</a>
+        <a href="{{ url_for('tasks_page') }}" class="nav-link {% if request.path.startswith('/tasks') %}active{% endif %}"><span>☑</span>Tasks</a>
+        <a href="{{ url_for('notes_page') }}" class="nav-link {% if request.path.startswith('/notes') %}active{% endif %}"><span>▧</span>Notes</a>
+        <a href="{{ url_for('pomodoro_page') }}" class="nav-link {% if request.path.startswith('/pomodoro') %}active{% endif %}"><span>◷</span>Pomodoro</a>
+        <a href="{{ url_for('assistant_page') }}" class="nav-link {% if request.path.startswith('/assistant') %}active{% endif %}"><span>✧</span>AI Assistant</a>
+        <a href="{{ url_for('attendance_page') }}" class="nav-link {% if request.path.startswith('/attendance') %}active{% endif %}"><span>▣</span>Attendance</a>
+        <a href="{{ url_for('analytics_page') }}" class="nav-link {% if request.path.startswith('/analytics') %}active{% endif %}"><span>▥</span>Analytics</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="avatar">{{ session.get('username', 'S')[:1]|upper }}</div><div class="account-label"><strong>{{ session.get('username', 'Student') }}</strong><small>Keep learning ✨</small></div><form method="post" action="{{ url_for('logout') }}" class="logout-form"><button type="submit" title="Log out" aria-label="Log out">↪</button></form>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="mobile-header">
+        <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">✦</span><span>StudyAssist</span></a>
+        <div class="mobile-tools"><button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" title="Switch theme">☾</button><button class="menu-button" type="button" aria-label="Toggle navigation" data-menu-toggle>☰</button></div>
+      </header>
+      <div class="page-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}<button type="button" aria-label="Dismiss" data-dismiss>×</button></div>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+        <footer class="footer">StudyAssist <span>·</span> Make small progress every day.</footer>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -4,3 +4,6 @@ __pycache__/
 venv/
 .env
 study_assistant.db
+study_assistant_streamlit.db
+study_assistant_streamlit.db-*
+.streamlit/secrets.toml

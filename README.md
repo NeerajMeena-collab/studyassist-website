@@ -71,3 +71,10 @@ study-assistant/
 ## College project walkthrough
 
 The Flask app handles browser requests and runs SQL queries through Python's built-in `sqlite3` library. Jinja templates display the results. JavaScript runs the timer in the browser and sends a completed session back to Flask. This is a learning prototype for one local student account; before deploying it for real users, add separate accounts with private data, CSRF protection, and a production secret key.
+
+
+## Deploy on Render
+
+This repository includes a Render Blueprint in `render.yaml`. In Render, create a new Blueprint from this GitHub repository and deploy it. Render installs the packages in `requirements.txt`, starts Flask with Gunicorn, and generates the `FLASK_SECRET_KEY` used to sign sessions.
+
+The free web service uses an ephemeral filesystem. The SQLite database is created on the running service and can be lost when the service restarts or redeploys, so treat this deployment as a demo. Persistent storage requires a different database setup or a paid persistent disk.
